@@ -227,8 +227,8 @@ impl Atencion{
     }
     pub fn igual(&self, atencion : &Atencion) -> bool{
         let mut ok = self.mascota.igual(&atencion.mascota) && self.diagnostico == atencion.diagnostico && self.tratamiento == atencion.tratamiento;
-        if let Some(self_fecha) = self.fecha_proxima{
-            if let Some(atencion_fecha) = atencion.fecha_proxima{
+        if let Some(self_fecha) = &self.fecha_proxima{
+            if let Some(atencion_fecha) = &atencion.fecha_proxima{
                 ok = ok && self_fecha.igual(&atencion_fecha);
             }
         } else{
@@ -238,54 +238,47 @@ impl Atencion{
     }
 }
 
-pub struct Veterinaria{
+pub struct Veterinaria<'a>{
     nombre: String,
     direccion : String, 
     id : u32,
-    cola_de_atencion : VecDeque<Mascota>,
+    cola_de_atencion : VecDeque<&'a Mascota>,
     registro_atenciones : Vec<Atencion>,
 }
 
-impl Veterinaria{
+impl <'a>Veterinaria<'a>{
     // ➔ crear una veterinaria.
-    pub fn new(nombre : String, direccion : String, id : u32) -> Veterinaria{
+    pub fn new(nombre : String, direccion : String, id : u32) -> Veterinaria<'a>{
         Veterinaria { nombre, direccion, id, cola_de_atencion: VecDeque::new(), registro_atenciones: Vec::new()}
     }
-    pub fn buscar_mascota(&self, mascota : &Mascota) -> Option<usize>{
-        let mut i : usize = 0;
-        while i <= self.cola_de_atencion.len()- 1{
-            if self.cola_de_atencion.get(i).unwrap().igual(&mascota){
-                return Some(i);
+    fn buscar_mascota(&self, mascota : &Mascota) -> Option<usize>{
+        for i in 0..self.cola_de_atencion.len() - 1{
+            if mascota.igual(self.cola_de_atencion[i]){
+                return Some(i)
             }
-            i += 1;
         }
         None
     }
-    pub fn buscar_atencion(&self, atencion : &Atencion) ->Option<usize>{
-        let mut i : usize = 0;
-        let mut encontre : bool = false;
-        while i <= self.registro_atenciones.len() - 1 && !encontre{
-            if let Some(aux_atencion) = self.registro_atenciones.get(i){
-                if aux_atencion.igual(&atencion){
-                    return Some(i)
-                }
+    fn buscar_atencion(&self, atencion : &Atencion) ->Option<usize>{
+        for i in 0..self.cola_de_atencion.len() - 1{
+            if atencion.igual(&self.registro_atenciones[i]){
+                return Some(i)
             }
-            i += 1;
         }
         None
     }
     // ES BUENA PRACTICA DEVOLVER BOOL PARA NOTIFICAR EL ESTADO DE LA TRANSACCION?
     // ➔ agregar una nueva mascota a la cola de atención de la veterinaria.
-    pub fn agregar_mascota(&mut self, mascota : Mascota ){
-        self.cola_de_atencion.push_back(mascota);
+    pub fn agregar_mascota(&mut self, mascota : &'a Mascota ){
+        self.cola_de_atencion.push_back(&mascota);
     }
     // ➔ agregar una nueva mascota a la cola de atención pero que sea la siguiente
     // en atender porque tiene la máxima prioridad.
-    pub fn agregar_mascota_prioritario(&mut self, mascota : Mascota){
-        self.cola_de_atencion.push_front(mascota);
+    pub fn agregar_mascota_prioritario(&mut self, mascota : &'a Mascota){
+        self.cola_de_atencion.push_front(&mascota);
     }
     // ➔ atender la próxima mascota de la cola.
-    pub fn atender_mascota(&mut self) -> Option<Mascota> {
+    pub fn atender_mascota(&mut self) -> Option<&Mascota> {
         self.cola_de_atencion.pop_front()
     }
     // ➔ eliminar una mascota específica de la cola de atención dado que se retira.
@@ -303,33 +296,36 @@ impl Veterinaria{
     }
     // ➔ buscar una atención dado el nombre de la mascota, el nombre del dueño y el
     // teléfono.
-    pub fn obtener_atencion(&mut self, atencion : Atencion) -> Option<&mut Atencion>{
-        if let Some(index) = self.buscar_atencion(&atencion){
-            Some(self.registro_atenciones.get_mut(index).unwrap())
-        } else {
-            None
+    pub fn obtener_atencion(&self, atencion : Atencion) -> Option<&Atencion>{
+        for i in &self.registro_atenciones{
+            if i.igual(&atencion){
+                return Some(i)
+            }
         }
-        
+        return None
     }
     // ➔ modificar el diagnóstico de una determinada atención.
-    pub fn cambiar_diagnostico(&mut self, atencion: Atencion, nuevo_diagnostico : String){
-        if let Some(aux_atencion) = self.obtener_atencion(atencion){
-            aux_atencion.set_diagnostico(nuevo_diagnostico);
-        } else {
-            println!("Error en la busqueda!")
+    pub fn cambiar_diagnostico(&mut self, atencion: Atencion, nuevo_diagnostico : String) -> bool{
+        for i in &mut self.registro_atenciones{
+            if i.igual(&atencion){
+                i.diagnostico = nuevo_diagnostico;
+                return true
+            }
         }
+        return false
     }
     // ➔ modificar la fecha de la próxima visita de una determinada atención.
-    pub fn cambiar_fecha(&mut self, atencion: Atencion, nueva_fecha : Option<Fecha>){
-        if let Some(aux_atencion) = self.obtener_atencion(atencion){
-            aux_atencion.set_fecha(nueva_fecha);
-        } else {
-            println!("Error en la busqueda!")
+    pub fn cambiar_fecha(&mut self, atencion: Atencion, nueva_fecha : Option<Fecha>) -> bool{
+        for i in &mut self.registro_atenciones{
+            if i.igual(&atencion){
+                i.fecha_proxima = nueva_fecha;
+                return true
+            }
         }
+        return false
     }
-    
     // ➔ eliminar una determinada atención.
-    pub fn eliminar_atencion(&mut self, atencion: Atencion){
+    pub fn eliminar_atencion(&mut self, atencion: &Atencion){
         if let Some(index) = self.buscar_atencion(&atencion){
             self.registro_atenciones.swap_remove(index);
         } else {

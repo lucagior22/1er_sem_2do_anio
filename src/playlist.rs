@@ -43,41 +43,29 @@ impl Cancion{
             genero,
         }
     }
-    pub fn get_titulo(&self) -> String{
-        self.titulo.clone()
-    }
-    pub fn get_artista(&self) -> String{
-        self.artista.clone()
-    }
-    pub fn get_genero(&self) -> &Genero{
-        &self.genero
-    }
 }
 
-pub struct Playlist{
+pub struct Playlist<'a>{
     nombre : String,
-    lista_canciones : Vec<Cancion>,
+    lista_canciones : Vec<&'a Cancion>,
 }
 
-impl Playlist{
-    pub fn new(nombre : String) -> Playlist{
+impl <'a> Playlist<'a>{
+    pub fn new(nombre : String) -> Playlist<'a>{
         Playlist{
             lista_canciones : Vec::new(),
             nombre,
         }
     }
-    pub fn agregar_cancion(&mut self, cancion : Cancion){
-        self.lista_canciones.push(cancion);
+    pub fn agregar_cancion(&mut self, cancion : &'a Cancion){
+        self.lista_canciones.push(&cancion);
     }
     pub fn eliminar_cancion(&mut self, titulo : String) -> bool{
-        let mut i : usize = 0;
-        let mut encontre : bool = false;
-        while i <= self.lista_canciones.len() - 1 && !encontre{
-            if *self.lista_canciones.get(i).unwrap().get_titulo() == titulo{
+        for i in 0..self.lista_canciones.len() - 1{
+            if self.lista_canciones[i].titulo == titulo{
                 self.lista_canciones.remove(i);
                 return true
             }
-            i += 1;
         }
         false
     }
@@ -89,9 +77,8 @@ impl Playlist{
 
     pub fn buscar_cancion(&self, titulo : String) -> Option<usize>{
         let mut i : usize = 0;
-        let mut encontre : bool = false;
-        while i <= self.lista_canciones.len() - 1 && !encontre{
-            if self.lista_canciones.get(i).unwrap().get_titulo() == titulo{
+        while i <= self.lista_canciones.len() - 1{
+            if self.lista_canciones.get(i).unwrap().titulo == titulo{
                 return Some(i)
             }
             i += 1;
@@ -99,25 +86,24 @@ impl Playlist{
         None
     }
 
-    pub fn canciones_genero(&self, genero : Genero) -> Vec<Cancion> {
-        let mut v_aux : Vec<Cancion> = Vec::new();
-        let mut c_aux : Cancion;
-        for i in 0..self.lista_canciones.len() - 1 {
-            c_aux = *self.lista_canciones.get(i).unwrap(); 
-            if  c_aux.get_genero().igual(&genero){
-                v_aux.push(c_aux);
-            } 
-        }
-        v_aux
-    }
-    pub fn canciones_artista(&self, artista : String) -> Option<Vec<Cancion>> {
-        let mut v_aux : Vec<Cancion> = Vec::new();
-        let mut c_aux : Cancion;
+    pub fn canciones_genero(&self, genero : Genero) -> Option<Vec<&Cancion>> {
+        let mut v_aux : Vec<&Cancion> = Vec::new();
         if !self.lista_canciones.is_empty(){
-            for i in 0..self.lista_canciones.len() - 1 {
-                c_aux = *self.lista_canciones.get(i).unwrap(); 
-                if  *c_aux.get_artista() == artista{
-                    v_aux.push(c_aux);
+            for i in &self.lista_canciones{ 
+                if  i.genero.igual(&genero){
+                    v_aux.push(i);
+                } 
+            }
+            Some(v_aux);
+        }
+        None
+    }
+    pub fn canciones_artista(&self, artista : String) -> Option<Vec<&Cancion>> {
+        let mut v_aux : Vec<&Cancion> = Vec::new();
+        if !self.lista_canciones.is_empty(){
+            for i in &self.lista_canciones{ 
+                if  i.artista == artista{
+                    v_aux.push(i);
                 } 
             }
             Some(v_aux);

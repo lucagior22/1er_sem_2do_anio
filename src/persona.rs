@@ -22,7 +22,7 @@ impl Persona{
         }
     }
     pub fn imprimir(&self){
-        if let Some(dir) = self.direccion{
+        if let Some(dir) = &self.direccion{
             println!("Nombre: {}, edad: {}, direccion: {}.", self.nombre, self.edad, dir)
         } else{
         println!("Nombre: {}, edad: {}, no se registra direccion.", self.nombre, self.edad)

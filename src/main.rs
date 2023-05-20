@@ -1,4 +1,4 @@
-mod p3;
+//mod p3;
 mod persona;
 mod biblioteca;
 mod concesionario;
@@ -11,7 +11,8 @@ mod producto;
 mod rectangulo;
 
 fn main() {
-    biblioteca::main();    
+    //biblioteca::main();  
+    concesionario::main();
 }
 
 

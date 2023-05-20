@@ -20,6 +20,7 @@
 // ■ si la marca es BMW le aplica un recargo del 15%-
 // ■ si el año es menor a 2000 le aplica un descuento del 5%.
 
+#[derive(Debug)]
 pub enum Color{
     Rojo,
     Verde,
@@ -42,6 +43,7 @@ impl Color{
     }
 }
 
+#[derive(Debug)]
 pub struct Auto{
     marca : String,
     modelo : String,
@@ -80,6 +82,7 @@ impl Auto{
     }
 }
 
+#[derive(Debug)]
 pub struct ConcesionarioAuto{
     nombre : String,
     direccion : String,
@@ -97,11 +100,9 @@ impl ConcesionarioAuto{
     }
     pub fn agregar_auto(&mut self, auto : Auto) -> bool{
         if self.autos.len() <= self.cant_autos{
-            println!("Existe espacio en el arreglo!");
             self.autos.push(auto);
             true
         } else {
-            println!("No existe espacio en el arreglo!");
             false
         }
     }
@@ -119,16 +120,35 @@ impl ConcesionarioAuto{
         }
     }
 
-    pub fn buscar_auto(&self, auto : Auto) -> Option<&mut Auto>{
+    pub fn buscar_auto(&mut self, auto : Auto) -> Option<&mut Auto>{
         let mut i = 0;
         let mut index: usize = 0;
         let mut encontre = false;
-        for mut i in self.autos{
+        for mut i in &mut self.autos{
             if i.igual(&auto){
-                return Some(&mut i)
+                return Some(i)
             }
         }
         return None
     } 
 }
 
+pub fn main(){
+    let mut a1 : Auto = Auto::new("Bmw".to_string(), "m3".to_string(), 2010, 15000.0, Color::Amarillo);
+    let mut a2 : Auto = Auto::new("Audi".to_string(), "R8".to_string(), 2017, 40000.0, Color::Negro);
+    let mut a3 : Auto = Auto::new("Ford".to_string(), "Fiesta".to_string(), 2005, 10000.0, Color::Rojo);
+    let mut a4 : Auto = Auto::new("Fiat".to_string(), "Uno".to_string(), 1999, 8000.0, Color::Azul);
+    let mut a5 : Auto = Auto::new("Dodge".to_string(), "Ram".to_string(), 2020, 17000.0, Color::Verde);
+    let mut a6 : Auto = Auto::new("Bmw".to_string(), "m4".to_string(), 2023, 25000.0, Color::Negro);
+
+    let mut conc : ConcesionarioAuto = ConcesionarioAuto::new("Concesionaria".to_string(), "Calle Falsa".to_string(), 4);
+
+    println!("{:#?}", conc.agregar_auto(a1));
+    println!("{:#?}", conc.agregar_auto(a2));
+    println!("{:#?}", conc.agregar_auto(a3));
+    println!("{:#?}", conc.agregar_auto(a4));
+    println!("{:#?}", conc.agregar_auto(a5));
+
+    println!("{:#?}", conc.buscar_auto(a6));
+
+}

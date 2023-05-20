@@ -71,7 +71,10 @@ impl Fecha{
             false
         }
     }
-     
+
+    pub fn es_bisiesto(&self) -> bool{
+        (self.año % 4 == 0) && (self.año % 100 != 0 || self.año % 400 == 0)
+    }
     
     pub fn sumar_dias(&mut self, suma : u32) -> bool{
         if self.es_fecha_valida(){

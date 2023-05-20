@@ -11,7 +11,7 @@ fn es_par(entero:i32) -> bool{
 
 // 2- Definir la función llamada es_primoque recibe un número entero positivo mayor a 1 y
 // retorna true si es primo, false caso contrario
-fn es_primo(n : u32) -> bool{
+pub fn es_primo(n : u32) -> bool{
     let mut ok : bool = true;
     for i in 2..n/2{
         println!("{}",n);

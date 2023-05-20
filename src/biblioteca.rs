@@ -135,7 +135,6 @@ impl Fecha{
                 false
             }
         } else {
-            println!("Alguna de las fechas es incorrecta!");
             false
         }
     }
@@ -485,7 +484,7 @@ pub fn main(){
     println!("Prestamos vencidos: {:#?}", biblioteca.prestamos_vencidos(&fecha_actual));
     
     println!("{:#?}", biblioteca.buscar_prestamo(&lib1, &cl1));
-    
-
+    println!("{:#?}", biblioteca.devolver_libro(&lib1, &cl1, &fecha_actual));
+    println!("Proximos a vencer: {:#?}", biblioteca.proximos_a_vencer(&fecha_actual, 365));
 
 }
